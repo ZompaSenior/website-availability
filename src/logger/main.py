@@ -13,10 +13,10 @@ import sys
 # Site-package Import
 
 # Project Import
-from monitor.app import monitor
+from logger.app import logger
 
 if __name__ == "__main__":
     # Preparatory settings
-    os.environ.setdefault("MONITORPATH", sys.path[0])
+    os.environ.setdefault("PARSERPATH", sys.path[0])
 
-    sys.exit(monitor.main(sys.argv))
+    sys.exit(logger.main(sys.argv))

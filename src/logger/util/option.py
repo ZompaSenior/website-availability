@@ -27,7 +27,6 @@ class ThrowingArgumentParser(argparse.ArgumentParser):
         raise ArgumentParserError(message)
 
 
-ARGUMENT_URL_LIST = "url_list"
 ARGUMENT_CONFIG_FILE = "config_file"
 
 
@@ -35,18 +34,13 @@ class AppOption(ThrowingArgumentParser):
     def __init__(self):
         """Everything is needed to let the option be used in the app."""
 
-        ThrowingArgumentParser.__init__(self, description = "Monitor")
-        
-        self.add_argument(
-            ARGUMENT_URL_LIST,
-            help = "path to the file containing the list of url to test",
-            type = str)
+        ThrowingArgumentParser.__init__(self, description = "Logger")
         
         self.add_argument(
             ARGUMENT_CONFIG_FILE,
             help = "Path to the config .ini file",
             type = str)
-        
+                
         self.add_argument(
             "--sleep_time",
             help = "time to sleep between each scan i seconds",
@@ -58,7 +52,7 @@ class AppOption(ThrowingArgumentParser):
             help = "time to sleep between two url test in seconds",
             type = int,
             default = 1)
-        
+
     def parse(self, args: list = None, silence: bool = False):
         
         try:

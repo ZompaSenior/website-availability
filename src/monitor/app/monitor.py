@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 import requests
 import time
+import enum
 
 # Site-package Import
 from kafka import KafkaProducer
@@ -15,6 +16,13 @@ from kafka import KafkaProducer
 from monitor.util import option
 from monitor.util import config
 
+
+class ReturnCode(enum.IntEnum):
+    OK = 0
+    OPTION_PARSER_ERROR = enum.auto()
+    URL_LIST_FILE_NOT_VALID_ERROR = enum.auto()
+    CONFIG_FILE_NOT_VALID_ERROR = enum.auto()
+    
 
 ERROR_STATUS = -1
 ERROR_DESCRIPTION_SERVER_UNREACHABLE = "Server unreachable"
@@ -71,43 +79,48 @@ def main(argv: list = None):
     opt = option.AppOption()
     
     if(opt.parse()):
-        return 1
+        return ReturnCode.OPTION_PARSER_ERROR
     
     try:
-        server_list = config.get_url_list(opt)
+        url_list = config.UrlList(opt)
     
     except Exception as e:
         print(ERROR_URL_LIST_FILE_NOT_VALID)
-        return 2
+        return ReturnCode.URL_LIST_FILE_NOT_VALID_ERROR
     
     try:
         cfg = config.AppConfig(opt)
     
     except Exception as e:
         print(ERROR_CONFIG_FILE_NOT_VALID)
-        return 3
+        return ReturnCode.CONFIG_FILE_NOT_VALID_ERROR
     
     while(True):
-        producer = KafkaProducer(
-            bootstrap_servers = cfg['kafka']['server_address'],
-            security_protocol = "SSL",
-            ssl_cafile = cfg['kafka']['ssl_cafile'],
-            ssl_certfile = cfg['kafka']['ssl_certfile'],
-            ssl_keyfile = cfg['kafka']['ssl_keyfile'])
+        try:
+            # Create the producer basd on the config file parameters
+            producer = KafkaProducer(
+                bootstrap_servers = cfg['kafka']['server_address'],
+                security_protocol = "SSL",
+                ssl_cafile = cfg['kafka']['ssl_cafile'],
+                ssl_certfile = cfg['kafka']['ssl_certfile'],
+                ssl_keyfile = cfg['kafka']['ssl_keyfile'])
+            
+            # Test all the urls in the list
+            for url in url_list.url_list:
+                metric = json.dumps(get_metric_info(url), indent = 2)
+                print(metric)
+                print("Sending to Kafka...", end = '')
+                producer.send(cfg['kafka']['topic_name'], metric.encode("utf-8"))
+                print("OK")
+                time.sleep(float(opt.pause))
+            
+            # Force sending of all messages
+            producer.flush()
+    
+            time.sleep(float(opt.sleep_time))
         
-        for url in server_list:
-            metric = json.dumps(get_metric_info(url), indent = 2)
-            print(metric)
-            # message = "message number {}".format(i)
-            # print("Sending: {}".format(message))
-            print("Sending to Kafka...", end = '')
-            producer.send(cfg['kafka']['topic_name'], metric.encode("utf-8"))
-            print("OK")
-            time.sleep(float(opt.pause / 1000))
+        except KeyboardInterrupt:
+            break
         
-        # Force sending of all messages
-        producer.flush()
+    return ReturnCode.OK
 
-        time.sleep(float(opt.sleep_time))
-        
-    return 0

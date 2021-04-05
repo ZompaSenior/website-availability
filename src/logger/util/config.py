@@ -8,7 +8,7 @@ import configparser
 # Site-package Import
 
 # Project Import
-from monitor.util import option
+from logger.util import option
 
 
 class NoValidOptionException(Exception):
@@ -25,41 +25,6 @@ class ConfigFileException(Exception):
     """The file indicated by the positional argument isn't valid."""
     pass
 
-
-class UrlList():
-    """"Basic class to manage option and loading of the URL list from file. """
-    
-    def __init__(self, app_option):
-        """Load the url list from the file indicated in the command line options.
-        
-        Pars:
-            option (AppOption): option object from command line"""
-        
-        # Initialize empty url list
-        self.__url_list = []
-        
-        # Check to have a valid option object
-        if(not app_option or not isinstance(app_option, option.AppOption)):
-            raise NoValidOptionException()
-        
-        # Check to have the proper parameter compiled
-        if(not app_option.url_list):
-            raise MissingArgumentException(option.ARGUMENT_URL_LIST)
-        
-        # Try to read the file indicated by the option
-        try:
-            with open(str(app_option.url_list), "rt") as f:
-                lines = f.readlines()
-                self.__url_list = [url.strip() for url in lines]
-        
-        except:
-            raise ConfigFileException()
-    
-    @property
-    def url_list(self):
-        """Read-only property for the url list."""
-        
-        return self.__url_list
 
 class AppConfig(configparser.ConfigParser):
     """Read and manage the application config file."""
