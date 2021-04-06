@@ -68,10 +68,10 @@ class AppOption(ThrowingArgumentParser):
         except Exception as e:
             if(not silence):
                 old_stdout = sys.stdout
-                sys.stdout = mystdout = StringIO()
+                sys.stdout = temp_stdout = StringIO()
                 self.print_help()
                 sys.stdout = old_stdout
-                print(str(e), mystdout.getvalue())
+                print(str(e), temp_stdout.getvalue())
 
             return 1
 

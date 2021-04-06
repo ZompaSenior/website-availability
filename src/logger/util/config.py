@@ -42,8 +42,7 @@ class AppConfig(configparser.ConfigParser):
         if(not app_option.config_file):
             raise MissingArgumentException("config_file")
         
-        try:
-            self.read(app_option.config_file)
-            
-        except:
+        dataset = self.read(app_option.config_file)
+        
+        if(not dataset):
             raise ConfigFileException(app_option.config_file)

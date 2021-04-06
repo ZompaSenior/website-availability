@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""Description of the module."""
+"""Monitor Unit Tests."""
 
 # Std Import
+import os
+import sys
 import unittest
 
 # Site-package Import
@@ -11,8 +13,6 @@ import unittest
 from monitor.app import monitor
 from monitor.util import option
 from monitor.util import config
-import os
-import sys
 
 
 class TestGetMetricInfo(unittest.TestCase):
@@ -47,38 +47,88 @@ class TestGetMetricInfo(unittest.TestCase):
             info["error"],
             monitor.ERROR_DESCRIPTION_SERVER_UNREACHABLE)
 
+
+class TestOptions(unittest.TestCase):
+    
+    def test_no_option(self):
+        app_option = option.AppOption()
+        self.assertEqual(app_option.parse([], True), 1)
+        
+    def test_config_file_option(self):
+        app_option = option.AppOption()
+        self.assertEqual(app_option.parse([
+            'fake_url_list_file',
+            'fake_config_file'], True), 0)
+
+
 class TestGetUrlList(unittest.TestCase):
 
     def test_no_option(self):
         with self.assertRaises(config.NoValidOptionException):
-            config.get_url_list(None)
+            config.UrlList(None)
     
     def test_wrong_option(self):
         with self.assertRaises(config.NoValidOptionException):
-            config.get_url_list(1)
+            config.UrlList(1)
     
     def test_option_with_no_url_list(self):
         o = option.AppOption()
         o.parse([], True)
         
         with self.assertRaises(config.MissingArgumentException):
-            config.get_url_list(o)
+            config.UrlList(o)
     
     def test_option_with_wrong_url_list_file(self):
         o = option.AppOption()
-        o.parse(["fake"], True)
+        o.parse(['fake_url_list_file',
+            'fake_config_file'], True)
         
         with self.assertRaises(config.ConfigFileException):
-            config.get_url_list(o)
+            config.UrlList(o)
     
     def test_option_with_correct_url_list_file(self):
         o = option.AppOption()
         config_file = os.path.join(sys.path[0],
                               "monitor_url_list.txt")
         o.parse([config_file,], True)
-        url_list = config.get_url_list(o)
-        self.assertEqual(len(url_list), 3)
+        url_list = config.UrlList(o)
+        self.assertEqual(len(url_list.url_list), 3)
     
+
+class TestConfig(unittest.TestCase):
+
+    def test_no_option(self):
+        with self.assertRaises(config.NoValidOptionException):
+            config.AppConfig(None)
+    
+    def test_wrong_option(self):
+        with self.assertRaises(config.NoValidOptionException):
+            config.AppConfig(1)
+    
+    def test_option_with_no_config_file(self):
+        o = option.AppOption()
+        o.parse([], True)
+        
+        with self.assertRaises(config.MissingArgumentException):
+            config.AppConfig(o)
+    
+    def test_option_with_wrong_config_file(self):
+        o = option.AppOption()
+        o.parse(['fake_url_list_file',
+                 'fake_config_file'])
+        
+        with self.assertRaises(config.ConfigFileException):
+            config.AppConfig(o)
+    
+    def test_option_with_correct_config_file(self):
+        o = option.AppOption()
+        config_file = os.path.join(sys.path[0],
+                              "monitor.ini")
+        o.parse(['fake_url_list_file',
+                 config_file,], True)
+        app_config = config.AppConfig(o)
+        
+        self.assertEqual(app_config["kafka"]["server_address"], "aaa")
 
 
 if __name__ == '__main__':

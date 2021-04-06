@@ -13,11 +13,12 @@ import enum
 from kafka import KafkaConsumer
 
 # Project Import
-from logger.util import option
 from logger.util import config
+from logger.util import db
+from logger.util import option
 
 
-class ReturnCode(enum.Enum):
+class ReturnCode(enum.IntEnum):
     OK = 0
     OPTION_PARSER_ERROR = enum.auto()
     URL_LIST_FILE_NOT_VALID_ERROR = enum.auto()
@@ -35,14 +36,14 @@ def main(argv: list = None):
     opt = option.AppOption()
     
     if(opt.parse()):
-        return ReturnCode.OPTION_PARSER_ERROR.value
+        return ReturnCode.OPTION_PARSER_ERROR
     
     try:
         cfg = config.AppConfig(opt)
     
     except Exception as e:
         print(ERROR_CONFIG_FILE_NOT_VALID)
-        return ReturnCode.CONFIG_FILE_NOT_VALID_ERROR.value
+        return ReturnCode.CONFIG_FILE_NOT_VALID_ERROR
     
     print("Creating Consumer ...", end = '')
     consumer = KafkaConsumer(
@@ -58,6 +59,8 @@ def main(argv: list = None):
     
     print("OK")
     
+    app_db = db.AppDB(cfg)
+    
     while(True):
         try:
             print(".", end = '')
@@ -68,6 +71,8 @@ def main(argv: list = None):
                 for tp, msgs in raw_msgs.items():
                     for msg in msgs:
                         print("Received: {}".format(msg.value))
+                        msg_dict = json.loads(msg.value.decode('utf-8'))
+                        app_db.insert_metric(msg_dict)
             
             # Commit offsets so we won't get the same messages again
             consumer.commit()
@@ -77,4 +82,4 @@ def main(argv: list = None):
         except KeyboardInterrupt:
             break
         
-    return ReturnCode.OK.value
+    return ReturnCode.OK
