@@ -13,9 +13,9 @@ import enum
 from kafka import KafkaConsumer
 
 # Project Import
-from logger.util import config
-from logger.util import db
-from logger.util import option
+from util import config
+from util import db
+from util import option
 
 
 class ReturnCode(enum.IntEnum):

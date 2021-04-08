@@ -49,7 +49,7 @@ class AppOption(ThrowingArgumentParser):
         
         self.add_argument(
             "--sleep_time",
-            help = "time to sleep between each scan i seconds",
+            help = "time to sleep between each scan in seconds",
             type = int,
             default = 5)
         

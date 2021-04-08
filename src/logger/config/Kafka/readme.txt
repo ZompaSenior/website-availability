@@ -1,0 +1,1 @@
+Copy in this folder all configuration and certificates for Kafka.

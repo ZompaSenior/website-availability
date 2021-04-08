@@ -8,7 +8,7 @@ import configparser
 # Site-package Import
 
 # Project Import
-from monitor.util import option
+from util import option
 
 
 class NoValidOptionException(Exception):

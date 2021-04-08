@@ -1,0 +1,1 @@
+Copy in this folder configuration and certificates in the two subfolder Kafka e PostgreSQL.

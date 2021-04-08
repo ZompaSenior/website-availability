@@ -13,8 +13,8 @@ import enum
 from kafka import KafkaProducer
 
 # Project Import
-from monitor.util import option
-from monitor.util import config
+from util import option
+from util import config
 
 
 class ReturnCode(enum.IntEnum):

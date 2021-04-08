@@ -13,7 +13,7 @@ import sys
 # Site-package Import
 
 # Project Import
-from logger.app import logger
+from app import logger
 
 if __name__ == "__main__":
     # Preparatory settings
