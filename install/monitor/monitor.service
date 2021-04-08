@@ -1,0 +1,16 @@
+[Unit]
+Description=Monitor
+Requires=docker.service
+After=docker.service
+
+[Service]
+WorkingDirectory=$(pwd)
+ExecStart=docker run -d website-availability-monitor
+ExecStop=docker stop website-availability-monitor
+TimeoutStartSec=0
+Restart=on-failure
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
