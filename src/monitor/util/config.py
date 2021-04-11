@@ -11,6 +11,9 @@ import configparser
 from util import option
 
 
+KEY_URL = "url"
+KEY_REGEX = "regex"
+
 class NoValidOptionException(Exception):
     """The 'app_option' object passed is not a valid 'AppOption' object."""
     pass
@@ -48,9 +51,13 @@ class UrlList():
         
         # Try to read the file indicated by the option
         try:
+            key_list = [KEY_URL, KEY_REGEX]
+            
             with open(str(app_option.url_list), "rt") as f:
                 lines = f.readlines()
-                self.__url_list = [url.strip() for url in lines]
+                self.__url_list = [
+                    {k: v.strip() for k, v in zip(key_list, line.split("|"))} 
+                    for line in lines if line and line.strip()[0] != "#"]
         
         except:
             raise ConfigFileException()

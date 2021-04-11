@@ -49,13 +49,13 @@ class AppOption(ThrowingArgumentParser):
         
         self.add_argument(
             "--sleep_time",
-            help = "time to sleep between each scan in seconds",
+            help = "time to sleep between each scan in seconds (default 5)",
             type = int,
             default = 5)
         
         self.add_argument(
             "--pause",
-            help = "time to sleep between two url test in seconds",
+            help = "time to sleep between two url test in seconds (default 1)",
             type = int,
             default = 1)
         
@@ -66,7 +66,10 @@ class AppOption(ThrowingArgumentParser):
             return 0
             
         except Exception as e:
+            # In case of roblems
             if(not silence):
+                # and if not explicitly silenced
+                # make some trick to provide elegant informations
                 old_stdout = sys.stdout
                 sys.stdout = temp_stdout = StringIO()
                 self.print_help()

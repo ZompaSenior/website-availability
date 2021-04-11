@@ -1,3 +1,16 @@
-http://www.google.com
-https://www.python.org/pippo
-http://www.xyzhhhggffdd.com
+# List of the url to monitor with the regular expression to search in the body
+#
+# Form of the file:
+# url | regex
+#         ^ regula expressione
+#     ^ pipe separator
+# ^ url to monitor
+#
+# Comments start with '#'
+# Blank lines are ignored
+#
+
+http://www.google.com|src="\/images\/branding\/googlelogo\/2x\/googlelogo_color_272x92dp.png"
+http://www.google.com|src="\/images\/branding\/googlelogo\/2x\/googlelogo_color_999x92dp.png"
+https://www.python.org/pippo|No Regex Necessary
+http://www.xyzhhhggffdd.com|No Regex Necessary

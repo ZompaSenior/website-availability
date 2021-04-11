@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" This is the starting point of the application."""
+"""Logger is an utility that store metrics about websites from a Kafka server."""
 
 __license__ = "GPL 3"
 __version__ = "0.0.1"

@@ -10,39 +10,72 @@ import unittest
 # Site-package Import
 
 # Project Import
-from monitor.app import monitor
-from monitor.util import option
-from monitor.util import config
+# aAdding the project source path as first
+current_path = sys.path[0]
+new_path = os.path.normpath(
+    os.path.join(sys.path[0], "..", "..", "src", "monitor"))
+sys.path.insert(0, new_path)
+
+from app import monitor
+from util import option
+from util import config
 
 
 class TestGetMetricInfo(unittest.TestCase):
 
-    def test_correct_url(self):
-        url = "http://www.google.com"
-        info = monitor.get_metric_info(url)
-        self.assertEqual(info["url"], url)
+    def test_correct_url_correct_regex(self):
+        url_cfg = {
+            config.KEY_URL: "https://www.python.org/",
+            config.KEY_REGEX: '<meta name="application-name" content="Python.org">'}
+        
+        info = monitor.get_metric_info(url_cfg)
+        self.assertEqual(info["url"], url_cfg[config.KEY_URL])
         self.assertEqual(info["status"], 200)
-        self.assertEqual(
-            info["body"][:50],
-            "<!doctype html><html itemscope=\"\" itemtype=\"http:/")
+        self.assertEqual(info["count_matches"], 1)
         self.assertEqual(info["error"], "")
 
-    def test_wrong_url(self):
-        url = "https://www.python.org/pippo"
-        info = monitor.get_metric_info(url)
-        self.assertEqual(info["url"], url)
+    def test_correct_url_wrong_regex(self):
+        url_cfg = {
+            config.KEY_URL: "https://www.python.org/",
+            config.KEY_REGEX: '<meta name="appplication-name" content="Python.org">'}
+
+        info = monitor.get_metric_info(url_cfg)
+        self.assertEqual(info["url"], url_cfg[config.KEY_URL])
+        self.assertEqual(info["status"], 200)
+        self.assertEqual(info["count_matches"], 0)
+        self.assertEqual(info["error"], "")
+
+    def test_wrong_url_correct_regex(self):
+        url_cfg = {
+            config.KEY_URL: "https://www.python.org/pippo",
+            config.KEY_REGEX: 'Error 404: File not Found'}
+
+        info = monitor.get_metric_info(url_cfg)
+        self.assertEqual(info["url"], url_cfg[config.KEY_URL])
         self.assertEqual(info["status"], 404)
-        self.assertEqual(
-            info["body"][:50],
-            "<!doctype html>\n<!--[if lt IE 7]>   <html class=\"n")
+        self.assertEqual(info["count_matches"], 1)
+        self.assertEqual(info["error"], "")
+
+    def test_wrong_url_wrong_regex(self):
+        url_cfg = {
+            config.KEY_URL: "https://www.python.org/pippo",
+            config.KEY_REGEX: 'Error 555: File not Found'}
+
+        info = monitor.get_metric_info(url_cfg)
+        self.assertEqual(info["url"], url_cfg[config.KEY_URL])
+        self.assertEqual(info["status"], 404)
+        self.assertEqual(info["count_matches"], 0)
         self.assertEqual(info["error"], "")
 
     def test_wrong_server(self):
-        url = "https://www.xyzhhhggffdd.com"
-        info = monitor.get_metric_info(url)
-        self.assertEqual(info["url"], url)
+        url_cfg = {
+            config.KEY_URL: "https://www.xyzhhhggffdd.com",
+            config.KEY_REGEX: ''}
+
+        info = monitor.get_metric_info(url_cfg)
+        self.assertEqual(info["url"], url_cfg[config.KEY_URL])
         self.assertEqual(info["status"], monitor.ERROR_STATUS)
-        self.assertEqual(info["body"], "")
+        self.assertEqual(info["count_matches"], -1)
         self.assertEqual(
             info["error"],
             monitor.ERROR_DESCRIPTION_SERVER_UNREACHABLE)
@@ -88,11 +121,11 @@ class TestGetUrlList(unittest.TestCase):
     
     def test_option_with_correct_url_list_file(self):
         o = option.AppOption()
-        config_file = os.path.join(sys.path[0],
+        config_file = os.path.join(current_path,
                               "monitor_url_list.txt")
         o.parse([config_file,], True)
         url_list = config.UrlList(o)
-        self.assertEqual(len(url_list.url_list), 3)
+        self.assertEqual(len(url_list.url_list), 5)
     
 
 class TestConfig(unittest.TestCase):
@@ -122,7 +155,7 @@ class TestConfig(unittest.TestCase):
     
     def test_option_with_correct_config_file(self):
         o = option.AppOption()
-        config_file = os.path.join(sys.path[0],
+        config_file = os.path.join(current_path,
                               "monitor.ini")
         o.parse(['fake_url_list_file',
                  config_file,], True)

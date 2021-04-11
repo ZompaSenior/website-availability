@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-""" This is the starting point of the application."""
+"""Monitor is an utility that scan for website from a list and send metric to
+a Kafka server."""
 
 __license__ = "GPL 3"
 __version__ = "0.0.1"

@@ -60,7 +60,10 @@ class AppOption(ThrowingArgumentParser):
             return 0
             
         except Exception as e:
+            # In case of roblems
             if(not silence):
+                # and if not explicitly silenced
+                # make some trick to provide elegant informations
                 old_stdout = sys.stdout
                 sys.stdout = mystdout = StringIO()
                 self.print_help()
